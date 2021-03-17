@@ -6,5 +6,5 @@ testBaseUrl=http://wai.66km.cn/#/partsList?
 baseUrl=http://api.1uap.com
 
 [wxApiSendUrl]
-API_URL=http://192.168.0.162:8073/send
+API_URL=http://localhost:8073/send
 URL=http://localhost

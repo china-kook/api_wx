@@ -67,7 +67,6 @@ public class CallWx {
 
         JSONObject wxObject = JSONObject.parseObject(result);
         JSONArray wxArray = wxObject.getJSONArray("data");
-//        String wxCode = "uap88888";
         String wxCode = "";
         String wxNickname = "";
 
@@ -76,8 +75,8 @@ public class CallWx {
             JSONObject jsonObject1 = wxArray.getJSONObject(i);
 
             if (jsonObject1.getString("robot_wxid").equals(robot_wxid)) {
-//                wxCode = "uap88888";
                 wxCode = jsonObject1.getString("wx_num");
+//                wxCode = "uap88888";
                 wxNickname = jsonObject1.getString("nickname");
             }
         }
@@ -106,7 +105,6 @@ public class CallWx {
 
             String pattern = "http://((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}";
             file_url = Pattern.compile(pattern).matcher(file_url).replaceAll(url);
-//            file_url = file_url.replace("http://", url);
 
             System.out.println("替换后的 file_url: " + file_url);
 
@@ -138,48 +136,27 @@ public class CallWx {
 
         // 是否为 VIN
         if (msg.length() == 17 && Pattern.matches("[0-9|a-zA-Z]+", msg)) {
-            Map<String, Object> vinParam = new HashMap<>();
-            vinParam.put("vin", msg);
-            vinParam.put("type", 2);
-            vinParam.put("wxId", robot_wxid);
-            vinParam.put("wxCode", wxCode);
-            vinParam.put("wxNickname", wxNickname);
-            vinParam.put("actionType", actionType);
 
-            // 查询车型组ID
-            RespEntity respEntity = BigDataServiceUtil.postGetBeanByAppInfo("/matchingByOpen/queryCarModelGroupByVinAggregation",
-                    resultInfo.get("appId").toString(), resultInfo.get("appKey").toString(), Record.create(vinParam), RespEntity.class);
+            Map<String, String> urlParam = new HashMap<>();
+            urlParam.put("wxid", wxCode);
+            urlParam.put("origWxId", robot_wxid);
+            urlParam.put("wxCode", wxCode);
+            urlParam.put("wxNickname", wxNickname);
+            urlParam.put("vin", msg);
+            urlParam.put("actionType", actionType);
 
-            if (respEntity.getCode() == 0) {
+            String url = baseUrl +  "param=" + URLEncoder.encode(JSON.toJSONString(urlParam));
 
-                if (JSONArray.parseArray(respEntity.getData().toString()).size() <= 0) {
-                    wxApi.sendTextMsg(robot_wxid, toWxid, "没有找到车型信息");
-                    return;
-                }
-
-                JSONObject jsonObject = JSONArray.parseArray(respEntity.getData().toString()).getJSONObject(0);
-
-                Map<String, String> urlParam = new HashMap<>();
-                urlParam.put("groupIds", jsonObject.getString("ids"));
-                urlParam.put("wxid", wxCode);
-
-//                JSONObject uri = JSONObject.parseObject();
-
-                String url = baseUrl +  "param=" + URLEncoder.encode(JSON.toJSONString(urlParam));
-
-                System.out.println(url);
-
-                if ("200".equals(wxType)) {
-                    wxApi.sendGroupAtMsg(robot_wxid, toWxid, final_from_wxid, final_nickname, "");
-                }
-
-                if ("3".equals(msgType)) {
-                    wxApi.sendTextMsg(robot_wxid, toWxid, msg);
-                }
-
-                wxApi.sendTextMsg(robot_wxid, toWxid, jsonObject.getString("title"));
-                wxApi.sendLinkMsg(robot_wxid, toWxid, "配件列表", "点击查看详情", url, "http://dmsimg.66km.com/dms/share_pic_zhangdan.png");
+            if ("200".equals(wxType)) {
+                wxApi.sendGroupAtMsg(robot_wxid, toWxid, final_from_wxid, final_nickname, "");
             }
+
+            if ("3".equals(msgType)) {
+                wxApi.sendTextMsg(robot_wxid, toWxid, msg);
+            }
+
+            wxApi.sendLinkMsg(robot_wxid, toWxid, "配件列表", "点击查看详情", url, "http://dmsimg.66km.com/dms/share_pic_zhangdan.png");
+
         }
     }
 
@@ -200,13 +177,4 @@ public class CallWx {
         return outStream.toByteArray();
     }
 
-    public static void main(String[] args) {
-        String fileUrl = "http://58.56.15.138:8073/static/1060556397.jpg";
-        String url = "http://localhost";
-//        fileUrl = fileUrl.replace("http://", url);
-//        System.out.println(fileUrl);
-        String pattern = "http://((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}";
-        fileUrl = Pattern.compile(pattern).matcher(fileUrl).replaceAll(url);
-        System.out.println(fileUrl);
-    }
 }

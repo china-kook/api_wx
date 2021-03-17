@@ -1,0 +1,10 @@
+[baseUrl]
+pageBaseUrl=http://ai.66km.cn/#/partsList?
+testBaseUrl=http://wai.66km.cn/#/partsList?
+
+[erpApi]
+baseUrl=http://api.1uap.com
+
+[wxApiSendUrl]
+API_URL=http://192.168.0.162:8073/send
+URL=http://localhost

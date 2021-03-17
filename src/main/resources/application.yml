@@ -1,0 +1,14 @@
+server:
+  port: 22001
+spring:
+  profiles:
+    include: db
+  aop:
+    proxy-target-class: true
+  jackson:
+    parser:
+      allow_single_quotes: false
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 1000MB

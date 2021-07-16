@@ -1,6 +1,8 @@
 [baseUrl]
 pageBaseUrl=http://ai.66km.cn/#/partsList?
-testBaseUrl=http://wai.66km.cn/#/partsList?
+waiBaseUrl=http://wai.66km.cn/#/partsList?
+pageBaseUrl2=http://wai.32che.cn/#/partsList?
+erpTestPath=http://tapi.1uap.com/app/app-store/wechat-empower?
 
 [erpApi]
 baseUrl=http://api.1uap.com

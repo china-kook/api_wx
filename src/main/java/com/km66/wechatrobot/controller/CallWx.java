@@ -1,6 +1,7 @@
 package com.km66.wechatrobot.controller;
 
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -36,7 +37,10 @@ public class CallWx {
     @Resource
     private WxApi wxApi;
 
-    private static final String baseUrl = AppKit.getStr("testBaseUrl", "baseUrl");
+    private static String baseUrl = AppKit.getStr("waiBaseUrl", "baseUrl");
+
+    // erp 测试
+    // private static final String baseUrl = AppKit.getStr("erpTestPath", "baseUrl");
 
     private static final String url = AppKit.getStr("URL", "wxApiSendUrl");
 
@@ -76,7 +80,7 @@ public class CallWx {
 
             if (jsonObject1.getString("robot_wxid").equals(robot_wxid)) {
                 wxCode = jsonObject1.getString("wx_num");
-//                wxCode = "uap88888";
+//                wxCode = "Autobot8888";
                 wxNickname = jsonObject1.getString("nickname");
             }
         }
@@ -95,6 +99,12 @@ public class CallWx {
 
         if (1000 != erpResult.getInteger("errCode")) {
             return;
+        }
+
+        String pushUrl = resultInfo.get("pushUrl").toString();
+
+        if (StrUtil.isNotBlank(pushUrl)) {
+            baseUrl = pushUrl;
         }
 
         if ("3".equals(msgType)) {
@@ -155,6 +165,7 @@ public class CallWx {
                 wxApi.sendTextMsg(robot_wxid, toWxid, msg);
             }
 
+            System.out.println("请求的URL：" + url);
             wxApi.sendLinkMsg(robot_wxid, toWxid, "配件列表", "点击查看详情", url, "http://dmsimg.66km.com/dms/share_pic_zhangdan.png");
 
         }

@@ -1,12 +1,12 @@
 package com.km66.wechatrobot.api;
 
+import cn.hutool.core.net.URLEncoder;
 import cn.hutool.http.HttpUtil;
 import com.km66.framework.core.utils.configkit.AppKit;
 import com.km66.wechatrobot.common.utils.Dict;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,7 @@ public class WxApi {
         data.put("type", 100);
 //        data.put("msg", new String(msg.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8));
         System.out.println(msg);
-        data.put("msg", URLEncoder.encode(new String(msg.getBytes(StandardCharsets.UTF_8))));
+        data.put("msg", URLEncoder.createDefault().encode(msg, StandardCharsets.UTF_8));
         System.out.println(data.getStr("msg"));
         data.put("to_wxid", toWxid);
         data.put("robot_wxid", robWxid);
@@ -55,7 +55,7 @@ public class WxApi {
         Dict data = new Dict();
         data.put("type", 102);
         System.out.println(msg);
-        data.put("msg", URLEncoder.encode(new String(msg.getBytes(StandardCharsets.UTF_8))));
+        data.put("msg", URLEncoder.createDefault().encode(msg, StandardCharsets.UTF_8));
         System.out.println(data.getStr("msg"));
         data.put("to_wxid", toWxid);
         data.put("at_wxid", atWxid);

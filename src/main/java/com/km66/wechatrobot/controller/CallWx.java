@@ -67,7 +67,7 @@ public class CallWx {
         result = result.replace("\"[","[");
         result = result.replace("]\"","]");
 
-        System.out.println(result);
+        System.out.println("获取账号列表：" + result);
 
         JSONObject wxObject = JSONObject.parseObject(result);
         JSONArray wxArray = wxObject.getJSONArray("data");
@@ -78,9 +78,13 @@ public class CallWx {
 
             JSONObject jsonObject1 = wxArray.getJSONObject(i);
 
+            System.out.println("账号" + i + ":" + jsonObject1);
+
             if (jsonObject1.getString("robot_wxid").equals(robot_wxid)) {
                 wxCode = jsonObject1.getString("wx_num");
-//                wxCode = "Autobot8888";
+                if (StrUtil.isBlank(wxCode)) {
+                    wxCode = jsonObject1.getString("wxid");
+                }
                 wxNickname = jsonObject1.getString("nickname");
             }
         }
@@ -157,16 +161,47 @@ public class CallWx {
 
             String url = baseUrl +  "param=" + URLEncoder.encode(JSON.toJSONString(urlParam));
 
-            if ("200".equals(wxType)) {
-                wxApi.sendGroupAtMsg(robot_wxid, toWxid, final_from_wxid, final_nickname, "");
-            }
+            Map<String, Object> carModelParam = new HashMap<>();
+            carModelParam.put("vin", msg);
+            carModelParam.put("type", 2);
+            carModelParam.put("wxId", robot_wxid);
+            carModelParam.put("wxCode", wxCode);
+            carModelParam.put("wxNickname", wxNickname);
+            carModelParam.put("actionType", actionType);
 
-            if ("3".equals(msgType)) {
-                wxApi.sendTextMsg(robot_wxid, toWxid, msg);
-            }
+            // 查询车型组
+            RespEntity respEntity = BigDataServiceUtil.postGetBeanByAppInfo("/matchingByOpen/queryCarModelGroupByVinAggregation",
+                    resultInfo.get("appId").toString(), resultInfo.get("appKey").toString(), Record.create(carModelParam), RespEntity.class);
 
-            System.out.println("请求的URL：" + url);
-            wxApi.sendLinkMsg(robot_wxid, toWxid, "配件列表", "点击查看详情", url, "http://dmsimg.66km.com/dms/share_pic_zhangdan.png");
+            String textMsg = "";
+
+            if (respEntity.getCode() == 0) {
+
+                if (JSONArray.parseArray(respEntity.getData().toString()).size() == 0) {
+                    wxApi.sendTextMsg(robot_wxid, toWxid, "抱歉未查询到车型信息，请核实VIN是否正确。");
+                    return;
+                }
+
+                JSONObject jsonObject = JSONArray.parseArray(respEntity.getData().toString()).getJSONObject(0);
+
+                if ("3".equals(msgType)) {
+                    textMsg += "VIN: " + msg + "\n";
+                    textMsg += "\n";
+
+                }
+                textMsg += "车型: " + jsonObject.getString("title");
+
+                if ("200".equals(wxType)) {
+                    wxApi.sendGroupAtMsg(robot_wxid, toWxid, final_from_wxid, final_nickname, "");
+                }
+
+                wxApi.sendTextMsg(robot_wxid, toWxid, textMsg);
+
+                System.out.println("请求的URL：" + url);
+                wxApi.sendLinkMsg(robot_wxid, toWxid, resultInfo.get("title").toString(), resultInfo.get("text").toString(),
+                        url, resultInfo.get("picUrl").toString());
+
+            }
 
         }
     }

@@ -23,7 +23,10 @@ public class ErpRespUtils {
         params.put("method", "get-parts-list-v2");
         params.put("sign", GenerateErpRequestSign.generateSign("get-parts-list-v2", timeStamp));
 
+        System.out.println("参数：" + JSONObject.toJSONString(params));
+        System.out.println("erpUrl = " + erpUrl);
         String resultErp = HttpUtil.post(erpUrl + "/app-store/get-parts-list-v2", params);
+        System.out.println("resultErp = " + resultErp);
 
         return JSONObject.parseObject(resultErp);
     }

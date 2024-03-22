@@ -71,7 +71,7 @@ public class CallWx {
 
         JSONObject wxObject = JSONObject.parseObject(result);
         JSONArray wxArray = wxObject.getJSONArray("data");
-        String wxCode = "";
+        String wxCode = StrUtil.isBlank(robot_wxid) ? "" : robot_wxid;
         String wxNickname = "";
 
         for (int i = 0; i < wxArray.size(); i++) {
@@ -100,6 +100,8 @@ public class CallWx {
         Map<String, Object> resultInfo = respInfoEntity.getData(Map.class);
 
         JSONObject erpResult = ErpRespUtils.getErpResult(wxCode, resultInfo.get("erpUrl").toString());
+
+        System.out.println("erp：" + erpResult);
 
         if (1000 != erpResult.getInteger("errCode")) {
             return;
@@ -173,8 +175,10 @@ public class CallWx {
             RespEntity respEntity = BigDataServiceUtil.postGetBeanByAppInfo("/matchingByOpen/queryCarModelGroupByVinAggregation",
                     resultInfo.get("appId").toString(), resultInfo.get("appKey").toString(), Record.create(carModelParam), RespEntity.class);
 
+            System.out.println("查询车型组respEntity: " + respEntity);
             String textMsg = "";
 
+            System.out.println("查询车型组：" + respEntity.getData().toString());
             if (respEntity.getCode() == 0) {
 
                 if (JSONArray.parseArray(respEntity.getData().toString()).size() == 0) {
@@ -184,6 +188,8 @@ public class CallWx {
 
                 JSONObject jsonObject = JSONArray.parseArray(respEntity.getData().toString()).getJSONObject(0);
 
+                System.out.println("jsonObject: " + jsonObject);
+
                 if ("3".equals(msgType)) {
                     textMsg += "VIN: " + msg + "\n";
                     textMsg += "\n";
@@ -191,10 +197,14 @@ public class CallWx {
                 }
                 textMsg += "车型: " + jsonObject.getString("title");
 
+                System.out.println("发送消息");
+                System.out.println(textMsg);
+                System.out.println(wxType);
                 if ("200".equals(wxType)) {
                     wxApi.sendGroupAtMsg(robot_wxid, toWxid, final_from_wxid, final_nickname, "");
                 }
 
+                System.out.println("文本");
                 wxApi.sendTextMsg(robot_wxid, toWxid, textMsg);
 
                 System.out.println("请求的URL：" + url);
